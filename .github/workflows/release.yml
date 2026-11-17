@@ -1,0 +1,81 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-musl
+            os: ubuntu-24.04
+            musl: true
+          - target: aarch64-unknown-linux-musl
+            os: ubuntu-24.04-arm
+            musl: true
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-22.04
+            musl: false
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - if: matrix.musl
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends musl-tools
+      - run: cargo build --release --locked --bin aperture --target ${{ matrix.target }}
+      - shell: bash
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            tag="v$(grep -m1 '^version' Cargo.toml | cut -d'"' -f2 || echo '0.1.0')"
+          fi
+          pkg="aperture-${tag}-${{ matrix.target }}"
+          mkdir -p "${pkg}/docs"
+          cp "target/${{ matrix.target }}/release/aperture" "${pkg}/aperture"
+          cp README.md LICENSE-MIT LICENSE-APACHE "${pkg}/"
+          cp docs/GUIDE.md docs/CLI.md "${pkg}/docs/"
+          tar -czf "${pkg}.tar.gz" "${pkg}"
+          echo "ARCHIVE_NAME=${pkg}.tar.gz" >> "$GITHUB_ENV"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.target }}
+          path: ${{ env.ARCHIVE_NAME }}
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd dist
+          sha256sum *.tar.gz > SHA256SUMS.txt
+          tag="${GITHUB_REF_NAME}"
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            tag="v$(grep -m1 '^version' ../Cargo.toml | cut -d'"' -f2 || echo '0.1.0')"
+          fi
+          if gh release view "${tag}" >/dev/null 2>&1; then
+            gh release upload "${tag}" --clobber *
+          else
+            gh release create "${tag}" --title "Aperture ${tag#v}" --generate-notes *
+          fi
