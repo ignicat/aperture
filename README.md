@@ -32,6 +32,12 @@ The optional `avif` feature requires `nasm` on the host to build `rav1d`.
 
 ## Installation
 
+### Prebuilt binaries
+
+Static `musl` and `gnu` archives (`x86_64`, `aarch64`) and `SHA256SUMS.txt` are published on the [Releases](https://github.com/ignicat/aperture/releases) page.
+
+### From source
+
 ```sh
 git clone https://github.com/ignicat/aperture.git
 cd aperture
