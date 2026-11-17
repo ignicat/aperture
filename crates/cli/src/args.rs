@@ -1016,41 +1016,59 @@ pub fn format_help(program: &str) -> String {
          \x20 {program} <inputs...> [target] [flags]\n\
          \x20 {program} process|fit|archive|inspect|compare|bench|watch|preset|completions ...\n\n\
          TARGET DSL:\n\
-         \x20 1920x1080, 1920х1080, 1920*1080, 1920:1080, 4k, uwqhd, fhd, qhd, 8k\n\
-         \x20 1920w, 1080h, 2x, 150%, ar:21:9, mp:12, >, <, ^, !, comma-lists, --screen [auto|DP-1|span]\n\n\
+         \x20 1920x1080, 1920х1080, 1920*1080, 1920:1080, 1920x_, _x1080, 1920w, 1080h\n\
+         \x20 vga|hd|fhd|qhd|uwqhd|4k|5k|6k|8k|..., 2x, 150%, ar:21:9[+], mp:12, @pixels\n\
+         \x20 modifiers: >, <, ^, ! | comma-lists | -t, --target <spec> | --screen [auto|DP-1|all|per-screen|span]\n\n\
          SCALING & RESTORATION:\n\
-         \x20 -a, --algo <auto|adaptive|fsr|ibp|ewa-lanczos|ewa-lanczossharp|ewa-robidoux|lanczos3|\n\
-         \x20             lanczos4|ssim-down|ssim-up|icbi|nedi|lineart|mmpx|xbrz|scalefx|mitchell|catmull|box|nearest>\n\
+         \x20 -a, --algo <auto|adaptive|fsr|ibp|ewa-lanczos|ewa-lanczossharp|ewa-robidoux|\n\
+         \x20             ewa-robidouxsharp|ewa-ginseng|lanczos3|lanczos4|ssim-down|ssim-up|\n\
+         \x20             icbi|nedi|lineart|mmpx|xbrz|scalefx|mitchell|catmull|box|nearest>\n\
          \x20 --linear | --oklab | --sigmoidal [k] | --chroma <krig|lanczos> | --antiring <0..1>\n\
-         \x20 --dejpeg [pct] | --denoise [pct] | --deband [pct] | --sharpen [pct] | --descaled\n\
-         \x20 --dither <none|bayer|floyd|blue-noise> | --grain [pct]\n\n\
+         \x20 --ibp-iters <0..6> | --premultiply <bool> | --alpha-fix | --no-alpha-fix\n\
+         \x20 --dejpeg [pct] | --denoise [pct] | --deband [pct] | --sharpen, --rcas [pct]\n\
+         \x20 --descaled | --dither <none|bayer|floyd|blue-noise> | --grain [pct]\n\n\
          FITTING & DISPLAY:\n\
          \x20 -m, --fit <auto|smart-crop|seam-carve|ambient|extend|mirror|gradient|contain|stretch|tile|split>\n\
          \x20 --gravity <auto|c|n|s|e|w|ne|nw|se|sw|x%,y%> | --safe-zone <edge:px|%> | --trim-borders\n\
-         \x20 --bg-color <#hex|oled> | --bg-blur <px> | --bg-dim <%> | --shadow | --radius <px>\n\
+         \x20 --bg-color <#hex|oled> | --bg-blur <px> | --bg-dim <%> | --shadow [pct] | --radius <px>\n\
          \x20 --dim <%> | --vignette <%> | --bezel <px> | --palette [json|css] | --set\n\n\
-         OUTPUT, ARCHIVES & AUTOMATION:\n\
-         \x20 --alongside (default) | -i, --replace [--backup] | -o, --out <path> | --name <tpl>\n\
-         \x20 -f, --format <auto|png|jpg|webp|qoi|tiff|bmp|tga|pnm|ico|ff|hdr|exr> | --lossless | --optimize\n\
-         \x20 --png-quant [N] | -q, --quality <1..100> | --target-ssim2 <score> | --max-bytes <size>\n\
-         \x20 --meta <keep|strip-privacy|strip-all> | --keep-dates | --verify | --stdout\n\
-         \x20 -r | --manifest <file> | --archive-mode <repack|extract|flatten> | --archive-format <fmt>\n\
-         \x20 --non-images <keep|drop|extract> | --dedup [exact|perceptual] | --link-skipped | --copy-skipped\n\
-         \x20 --include <glob> | --exclude <glob> | --skip-if-fits | --resume | --watch | --preview\n\
-         \x20 -j <threads> | --memory-limit <size> | -p, --preset <name> | --json | --dry-run"
+         OUTPUT, FORMATS & CONFLICT:\n\
+         \x20 --alongside (default) | -i, --replace, --in-place [--backup] | -o, --out <path>\n\
+         \x20 --name <tpl> | --suffix <str> | --on-conflict <skip|overwrite|rename|smaller>\n\
+         \x20 -f, --format <auto|png|jpg|webp|qoi|tiff|bmp|tga|pnm|ico|ff|hdr|exr|jxl|avif|svg>\n\
+         \x20 --lossless | --optimize | --png-quant [N] | -q, --quality <1..100> | --target-ssim2 <score>\n\
+         \x20 --max-bytes <size> | --chroma-subsampling <auto|444|422|420> | --ico-sizes <list>\n\
+         \x20 --meta <keep|strip-privacy|strip-all> | --keep-dates | --verify | --stdout\n\n\
+         BATCH, ARCHIVES & DIAGNOSTICS:\n\
+         \x20 -r, --recursive | --manifest <file> | --include <glob> | --exclude <glob>\n\
+         \x20 --only-orientation <landscape|portrait|square> | --min-res <WxH> | --max-res <WxH>\n\
+         \x20 --skip-if-fits | --link-skipped | --copy-skipped | --on-error <skip|copy-raw|fail>\n\
+         \x20 --strict | --fail-on <error|truncated|warn>\n\
+         \x20 --archive-mode <repack|extract|flatten> | --archive-format <auto|zip|tar|tar.gz|tar.zst|tar.xz|tar.bz2>\n\
+         \x20 --archive-depth <N> | --non-images <keep|drop|extract> | --dedup [exact|perceptual|N]\n\
+         \x20 --max-entry-size <size> | --max-total-size <size> | --max-pixels <N> | --max-ratio <f64>\n\
+         \x20 -j, --threads <N> | --memory-limit <size> | -p, --preset <name> | -n, --dry-run\n\
+         \x20 --resume [path] | --watch | --iters <N> | --report <text|json> | --json\n\
+         \x20 --preview | --preview-only | --preview-proto <auto|kitty|sixel|sextant|half>\n\
+         \x20 --quiet | --verbose | -h, --help | -V, --version"
     )
 }
 
 pub fn generate_completions(shell: ShellKind, program: &str) -> String {
-    let flags = "--algo --fit --target --screen --out --name --suffix --replace --alongside \
-                 --backup --format --lossless --optimize --png-quant --quality --target-ssim2 \
-                 --max-bytes --meta --keep-dates --verify --stdout --recursive --manifest \
-                 --archive-mode --archive-format --non-images --dedup --include --exclude \
-                 --skip-if-fits --dejpeg --denoise --deband --sharpen --descaled --dither \
-                 --grain --gravity --safe-zone --trim-borders --bg-color --bg-blur --bg-dim \
-                 --shadow --radius --dim --vignette --bezel --palette --set --threads \
-                 --memory-limit --dry-run --resume --watch --preview --preview-only --preset \
-                 --json --quiet --verbose --help --version";
+    let flags = "--algo --alongside --alpha-fix --antiring --archive-depth --archive-format \
+                 --archive-mode --backup --bezel --bg-blur --bg-color --bg-dim --chroma \
+                 --chroma-subsampling --copy-skipped --deband --dedup --dejpeg --denoise \
+                 --descaled --dim --dither --dry-run --exclude --fail-on --fit --format \
+                 --grain --gravity --help --ibp-iters --ico-sizes --in-place --include \
+                 --iters --json --keep-dates --linear --link-skipped --lossless --manifest \
+                 --max-bytes --max-entry-size --max-pixels --max-ratio --max-res \
+                 --max-total-size --memory-limit --meta --min-res --name --no-alpha-fix \
+                 --non-images --oklab --on-conflict --on-error --only-orientation --optimize \
+                 --out --palette --png-quant --premultiply --preset --preview --preview-only \
+                 --preview-proto --quality --quiet --radius --rcas --recursive --replace \
+                 --report --resume --safe-zone --screen --set --shadow --sharpen --sigmoidal \
+                 --skip-if-fits --stdout --strict --suffix --target --target-ssim2 --threads \
+                 --trim-borders --verbose --verify --version --vignette --watch";
     match shell {
         ShellKind::Bash => format!(
             "_{program}_complete() {{\n\
@@ -1080,19 +1098,13 @@ pub fn generate_completions(shell: ShellKind, program: &str) -> String {
             .map(|f| format!("complete -c {program} -l {f}"))
             .collect::<Vec<_>>()
             .join("\n"),
-        ShellKind::Nushell => format!(
-            "export extern \"{program}\" [\n\
-             \x20 ...args: string\n\
-             \x20 --algo(-a): string\n\
-             \x20 --fit(-m): string\n\
-             \x20 --target(-t): string\n\
-             \x20 --format(-f): string\n\
-             \x20 --out(-o): path\n\
-             \x20 --replace(-i)\n\
-             \x20 --lossless\n\
-             \x20 --optimize\n\
-             \x20 --set\n\
-             ]"
-        ),
+        ShellKind::Nushell => {
+            let fields = flags
+                .split_whitespace()
+                .map(|f| format!("  {f}"))
+                .collect::<Vec<_>>()
+                .join("\n");
+            format!("export extern \"{program}\" [\n  ...args: string\n{fields}\n]")
+        }
     }
 }

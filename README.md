@@ -59,6 +59,11 @@ aperture <inputs...> [target] [flags]
 aperture process|fit|archive|inspect|compare|bench|watch|preset|completions ...
 ```
 
+### Documentation
+
+- [User guide](docs/GUIDE.md): walkthroughs for scaling, restoration, wallpapers, archives, and Rust embedding
+- [CLI reference](docs/CLI.md): full specification of subcommands, target DSL, all flags, template tokens, environment variables, and exit codes
+
 ### Target specification DSL
 
 Targets accept ASCII `x`, Cyrillic `х`, `*`, `:`, resolution aliases (`fhd`, `qhd`, `uwqhd`, `4k`, `8k`), single-edge constraints (`1920w`, `1080h`), relative multipliers (`2x`, `150%`), aspect/megapixel rules (`ar:21:9`, `mp:12`), conditional bounds (`>`, `<`, `^`, `!`), comma-separated multi-target lists, or live display queries (`--screen auto`, `--screen DP-1`, `--screen span`).
